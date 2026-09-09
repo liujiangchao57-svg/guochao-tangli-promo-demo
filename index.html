@@ -4,5 +4,257 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>巨量引擎 · 国潮汤礼全域推广</title>
+  <style>
+    :root {
+      --bg: #0b0d12; --panel: #141820; --line: #2a3347; --text: #e8edf7; --muted: #8b97ad;
+      --blue: #2b7cff; --orange: #ff6a2b; --green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .topbar { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #10141c; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .logo { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #2b7cff, #7c4dff); display: grid; place-items: center; font-size: 14px; }
+    .top-right { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
+    .pill { background: #1f2a3d; border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+    .side { background: #10141c; border-right: 1px solid var(--line); padding: 16px 10px; }
+    .nav-item { padding: 10px 12px; border-radius: 8px; color: var(--muted); cursor: pointer; font-size: 14px; margin-bottom: 4px; }
+    .nav-item.active, .nav-item:hover { background: #1b2435; color: #fff; }
+    .main { padding: 20px 24px 40px; }
+    h1 { font-size: 22px; margin-bottom: 6px; }
+    .sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .card .k { color: var(--muted); font-size: 12px; }
+    .card .v { font-size: 24px; font-weight: 700; margin-top: 6px; }
+    .card .d { font-size: 12px; margin-top: 6px; color: var(--green); }
+    .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    button, .btn { border: 0; cursor: pointer; border-radius: 8px; padding: 9px 14px; font-size: 13px; color: #fff; background: #243044; }
+    .btn-primary { background: linear-gradient(90deg, var(--blue), #5b6cff); }
+    .btn-orange { background: var(--orange); }
+    .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+    .tag-run { background: #16321f; color: #4ade80; }
+    .tag-wait { background: #3a2a12; color: #fbbf24; }
+    .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.62); display: none; align-items: flex-start; justify-content: center; z-index: 50; overflow: auto; padding: 40px 16px; }
+    .modal { width: min(920px, 100%); background: #121722; border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+    .steps { display: flex; gap: 8px; margin: 16px 0 20px; }
+    .step { flex: 1; text-align: center; font-size: 12px; color: var(--muted); padding: 8px; border-bottom: 2px solid #2a3347; }
+    .step.on { color: #fff; border-color: var(--blue); }
+    .step.done { color: var(--green); border-color: var(--green); }
+    label { display: block; font-size: 13px; color: #c9d3e4; margin: 12px 0 6px; }
+    input, select { width: 100%; background: #0e131c; border: 1px solid var(--line); color: #fff; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .choice { border: 1px solid var(--line); border-radius: 10px; padding: 12px; cursor: pointer; background: #0e131c; }
+    .choice.sel { border-color: var(--blue); background: #152036; }
+    .choice b { display: block; margin-bottom: 4px; }
+    .footer-actions { display: flex; justify-content: space-between; margin-top: 22px; }
+    .toast { position: fixed; right: 20px; bottom: 20px; background: #16321f; color: #bbf7d0; padding: 12px 16px; border-radius: 10px; display: none; z-index: 80; }
+    .creative { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; background: #0e131c; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .thumb { height: 88px; border-radius: 8px; background: linear-gradient(160deg, #3b2a1a, #7a4a22 40%, #e8c48a); display: grid; place-items: center; font-size: 12px; text-align: center; padding: 8px; }
+    .ok { color: var(--green); font-size: 12px; }
+    .page { display: none; }
+    .page.show { display: block; }
+    .plan-box { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 12px; }
+    .kv { display: grid; grid-template-columns: 120px 1fr; gap: 8px 12px; font-size: 13px; }
+    .kv span { color: var(--muted); }
+  </style>
 </head>
+<body>
+  <div class="topbar">
+    <div class="brand"><div class="logo">巨</div> 巨量引擎工作台</div>
+    <div class="top-right"><span class="pill">账户：国潮汤礼旗舰店</span><span>余额 ¥20,000.00</span><span>投放专员 C</span></div>
+  </div>
+  <div class="layout">
+    <aside class="side">
+      <div class="nav-item" data-page="home">工作台</div>
+      <div class="nav-item active" data-page="promo">全域推广</div>
+      <div class="nav-item" data-page="asset">资产 / 种子人群</div>
+      <div class="nav-item" data-page="report">数据报表</div>
+      <div class="nav-item" data-page="plan">推广计划一页纸</div>
+    </aside>
+    <main class="main">
+      <section id="page-home" class="page">
+        <h1>工作台</h1>
+        <p class="sub">账号已连接飞书任务「科学付费投放」。</p>
+        <div class="cards">
+          <div class="card"><div class="k">昨日消耗</div><div class="v">¥1,280</div><div class="d">计划内</div></div>
+          <div class="card"><div class="k">表单提交</div><div class="v">42</div><div class="d">CVR 对齐A版测试</div></div>
+          <div class="card"><div class="k">当前CPA</div><div class="v">¥30.5</div><div class="d">低于行业均值38%</div></div>
+          <div class="card"><div class="k">在投计划</div><div class="v">1</div><div class="d">全域获客</div></div>
+        </div>
+      </section>
+      <section id="page-promo" class="page show">
+        <h1>全域推广</h1>
+        <p class="sub">不手搓标签圈人。用验证过的A版素材 + 私域高意向种子，交给智能投放找增量。</p>
+        <div class="toolbar">
+          <button class="btn-primary" onclick="openWizard(1)">+ 新建全域计划</button>
+          <button class="btn-ghost" onclick="showToast('已同步飞书看板')">同步飞书看板</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>计划名称</th><th>优化目标</th><th>状态</th><th>日预算</th><th>消耗</th><th>转化</th><th>CPA</th><th>操作</th></tr></thead>
+            <tbody id="planTable">
+              <tr><td>待创建 — 点右上角新建</td><td>—</td><td><span class="tag tag-wait">未开始</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td><button class="btn-primary" onclick="openWizard(1)">去创建</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section id="page-asset" class="page">
+        <h1>资产 / 种子人群</h1>
+        <p class="sub">把高意向种子交给模型，而不是勾选年龄标签。</p>
+        <div class="card">
+          <p style="margin-bottom:10px"><b>已上传种子包</b></p>
+          <table>
+            <tr><th>人群包</th><th>来源</th><th>人数</th><th>用途</th></tr>
+            <tr><td>私域A/B-表单提交用户</td><td>问卷星/社群热启动</td><td>60</td><td>种子 + 相似扩展</td></tr>
+            <tr><td>AI画像-国潮养生礼赠</td><td>第一阶段智能体</td><td>信号层</td><td>内容场景偏好</td></tr>
+          </table>
+          <p class="hint">人数较少也可作为种子。系统会基于种子做相似人群探索，不锁死 25-35 岁。</p>
+        </div>
+      </section>
+      <section id="page-report" class="page">
+        <h1>数据报表</h1>
+        <p class="sub">对比行业获客成本均值。</p>
+        <div class="cards">
+          <div class="card"><div class="k">行业获客CPA均值</div><div class="v">¥49.2</div><div class="d" style="color:#fbbf24">对照口径</div></div>
+          <div class="card"><div class="k">本计划CPA</div><div class="v">¥30.5</div><div class="d">下降 38%</div></div>
+          <div class="card"><div class="k">A版素材CVR</div><div class="v">33.3%</div><div class="d">零成本测试胜出</div></div>
+          <div class="card"><div class="k">B版素材CVR</div><div class="v">16.7%</div><div class="d" style="color:#f87171">未进入放量</div></div>
+        </div>
+        <div class="card" style="margin-top:12px"><p>结论：小步测试 → 种子建包 → 全域智能放大。每一分钱对应可跟进客户，不再是糊涂账。</p></div>
+      </section>
+      <section id="page-plan" class="page">
+        <h1>推广计划一页纸</h1>
+        <p class="sub">先核对计划要点，再进入「全域推广」创建计划。</p>
+        <div class="plan-box"><div class="kv">
+          <span>目标</span><b>获客（表单提交 / 获取客户），不以播放量为KPI</b>
+          <span>主素材</span><b>A版情绪价值海报/视频（CVR 33.3%）</b>
+          <span>人群策略</span><b>种子包 + 智能探索，不锁死标签</b>
+          <span>投放方式</span><b>全域智能投放 · 控成本</b>
+          <span>节奏</span><b>48小时试投 → 达标放量 / 不达标关停</b>
+          <span>日预算</span><b>¥2,000</b>
+          <span>CPA红线</span><b>¥35，超线停投</b>
+          <span>预期</span><b>CPA较行业均值下降约38%</b>
+        </div></div>
+      </section>
+    </main>
+  </div>
+  <div class="modal-mask" id="wizard">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h2>新建全域计划</h2><button class="btn-ghost" onclick="closeWizard()">关闭</button></div>
+      <div class="steps">
+        <div class="step on" id="s1">1 目标与计划</div>
+        <div class="step" id="s2">2 种子与探索</div>
+        <div class="step" id="s3">3 素材与出价</div>
+        <div class="step" id="s4">4 确认发布</div>
+      </div>
+      <div id="w1">
+        <label>计划名称</label><input id="planName" value="国潮汤礼-A版获客-全域试投" />
+        <label>优化目标</label>
+        <div class="row">
+          <div class="choice sel" onclick="pick(this,'goal')"><b>获取客户 / 表单提交</b><span class="hint">对应董事长痛点：投了钱要看到客户。</span></div>
+          <div class="choice" onclick="pick(this,'goal')"><b>支付 ROI（备用）</b><span class="hint">电商成交场景再用。</span></div>
+        </div>
+        <div class="row">
+          <div><label>日预算（元）</label><input id="budget" value="2000" /></div>
+          <div><label>投放时长</label><select><option>连续投放 · 先跑48小时试投</option><option>指定时段 19:00-22:00</option></select></div>
+        </div>
+      </div>
+      <div id="w2" style="display:none">
+        <label>人群策略</label>
+        <div class="choice sel" style="margin-bottom:10px"><b>✓ 智能定向 + 种子包引导</b><div class="hint">不勾选“25-35岁+高消费+搜过熬夜”。把私域已提交表单的60人作为种子，允许系统相似探索。</div></div>
+        <div class="row">
+          <div class="choice sel" onclick="pick(this,'seed')"><b>种子：私域表单用户 60人</b><span class="hint">来自零成本A/B测试胜出样本</span></div>
+          <div class="choice sel" onclick="pick(this,'seed')"><b>信号：AI养生礼赠画像</b><span class="hint">熬夜恢复 / 送礼体面 / 药食同源</span></div>
+        </div>
+        <p class="hint" style="margin-top:12px">圈人从手选标签，升级为用真实转化数据训练模型。</p>
+      </div>
+      <div id="w3" style="display:none">
+        <label>投放素材</label>
+        <div class="creative">
+          <div class="thumb">A版<br/>情绪价值<br/>治愈微笑</div>
+          <div><b>别再送烟酒了！这款国潮汤礼，让你的品味瞬间高级！</b><div class="ok">已通过零成本A/B · CVR 33.3% · 选用投放</div><div class="hint">B版产品图 CVR 16.7%，本计划不投放，避免预算对打。</div></div>
+        </div>
+        <div class="row">
+          <div><label>出价方式</label><select><option>控成本投放（建议）</option><option>放量投放（达标后再开）</option></select></div>
+          <div><label>目标CPA（元）</label><input id="cpa" value="35" /><div class="hint">红线 ¥35。行业均值约 ¥49，目标降38%至 ¥30 左右。</div></div>
+        </div>
+      </div>
+      <div id="w4" style="display:none">
+        <div class="plan-box">
+          <p style="margin-bottom:10px"><b>发布前确认</b></p>
+          <div class="kv">
+            <span>计划</span><b id="cName">国潮汤礼-A版获客-全域试投</b>
+            <span>目标</span><b>获取客户 / 表单提交</b>
+            <span>人群</span><b>种子包 + 智能探索（不锁标签）</b>
+            <span>素材</span><b>A版情绪价值物料</b>
+            <span>日预算</span><b id="cBudget">¥2,000</b>
+            <span>目标CPA</span><b id="cCpa">¥35</b>
+            <span>风控</span><b>48小时未起量或超CPA红线 → 关停不追加</b>
+          </div>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn-ghost" id="prevBtn" onclick="prevStep()">上一步</button>
+        <div>
+          <button class="btn-primary" id="nextBtn" onclick="nextStep()">下一步</button>
+          <button class="btn-orange" id="pubBtn" style="display:none" onclick="publish()">确认发布计划</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast">已保存</div>
+  <script>
+    let step = 1;
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.onclick = () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('show'));
+        document.getElementById('page-' + el.dataset.page).classList.add('show');
+      };
+    });
+    function pick(el, group) {
+      if (group === 'goal') {
+        el.parentElement.querySelectorAll('.choice').forEach(c => c.classList.remove('sel'));
+        el.classList.add('sel');
+      }
+    }
+    function openWizard(n) { step = n || 1; document.getElementById('wizard').style.display = 'flex'; renderStep(); }
+    function closeWizard() { document.getElementById('wizard').style.display = 'none'; }
+    function renderStep() {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById('w' + i).style.display = i === step ? 'block' : 'none';
+        const s = document.getElementById('s' + i);
+        s.className = 'step' + (i === step ? ' on' : (i < step ? ' done' : ''));
+      }
+      document.getElementById('prevBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
+      document.getElementById('nextBtn').style.display = step === 4 ? 'none' : 'inline-block';
+      document.getElementById('pubBtn').style.display = step === 4 ? 'inline-block' : 'none';
+      document.getElementById('cName').textContent = document.getElementById('planName').value;
+      document.getElementById('cBudget').textContent = '¥' + Number(document.getElementById('budget').value).toLocaleString();
+      document.getElementById('cCpa').textContent = '¥' + document.getElementById('cpa').value;
+    }
+    function nextStep() { if (step < 4) { step++; renderStep(); } }
+    function prevStep() { if (step > 1) { step--; renderStep(); } }
+    function publish() {
+      const name = document.getElementById('planName').value;
+      const budget = document.getElementById('budget').value;
+      document.getElementById('planTable').innerHTML = '<tr><td>'+name+'</td><td>获取客户</td><td><span class="tag tag-run">投放中</span></td><td>¥'+Number(budget).toLocaleString()+'</td><td>¥1,280</td><td>42</td><td>¥30.5</td><td><button class="btn-ghost" onclick="document.querySelector(\'[data-page=report]\').click()">看报表</button></td></tr>';
+      closeWizard();
+      showToast('计划已发布。CPA ¥30.5，较行业均值下降38%');
+    }
+    function showToast(t) {
+      const el = document.getElementById('toast');
+      el.textContent = t;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 2600);
+    }
+  </script>
+</body>
 </html>
